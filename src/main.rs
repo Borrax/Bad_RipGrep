@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
 
 fn crawl_paths(starting_path: &Path) -> Vec<PathBuf> {
@@ -24,6 +25,19 @@ fn crawl_paths(starting_path: &Path) -> Vec<PathBuf> {
     found_paths
 }
 
+fn look_for_match_in_file(path: &Path, search_str: &str) {
+    let file = fs::File::open(path).expect("Could not open file");
+    let reader = BufReader::new(file);
+
+    for (index, line) in reader.lines().enumerate() {
+        let line = line.unwrap();
+
+        if line.contains(search_str) {
+            println!("{}: {}", index + 1, line);
+        }
+    }
+}
+
 fn main() {
     let starting_path = Path::new("./");
     
@@ -31,6 +45,6 @@ fn main() {
 
     for path in paths {
         println!("{}", path.display());
+        look_for_match_in_file(&path, "lorem");
     }
-
 }
