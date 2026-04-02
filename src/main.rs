@@ -30,7 +30,10 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
     let reader = BufReader::new(file);
 
     for (index, line) in reader.lines().enumerate() {
-        let line = line.unwrap();
+        let line = match line {
+            Ok(l) => l,
+            Err(_) => continue,
+        };
 
         if line.contains(search_str) {
             println!("{}: {}", index + 1, line);
