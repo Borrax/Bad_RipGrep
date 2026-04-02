@@ -26,8 +26,9 @@ fn crawl_paths(starting_path: &Path) -> Vec<PathBuf> {
 }
 
 fn look_for_match_in_file(path: &Path, search_str: &str) {
-    let file = fs::File::open(path).expect("Could not open file");
+    let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
+    let max_line_length = 60;
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -36,7 +37,7 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
         };
 
         if line.contains(search_str) {
-            println!("{}: {}", index + 1, line);
+            println!("{}: {:.max_line_length$}", index + 1, line);
         }
     }
 }
