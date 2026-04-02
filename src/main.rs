@@ -1,20 +1,28 @@
-use std::env;
+use std::fs;
+use std::path::{Path, PathBuf};
 
-fn is_flag(arg: &str) -> bool {
-    let Some(first_char) = arg.chars().next() else {
-        panic!("Didn't receive a string argument")
-    };
-    first_char == '-' 
+fn crawl_paths(starting_path: &Path, dir_paths: &mut Vec<PathBuf>) -> Vec<PathBuf> {
+    let mut found_paths = Vec::new();
+
+    let entries = fs::read_dir(starting_path).unwrap();
+
+    for entry in entries.flatten() {
+        let curr_path = entry.path();
+
+        if curr_path.is_dir() {
+            dir_paths.push(curr_path);
+        } else {
+            found_paths.push(curr_path);
+        }
+    }
+
+    found_paths
 }
 
 fn main() {
-    let string_stuff = String::new();
+    let starting_path = Path::new("./");
+    let mut found_dirs = Vec::<PathBuf>::new();
+    
+    crawl_paths(starting_path, &mut found_dirs);
 
-    let args: Vec<String> = env::args().collect();
-        for (i, arg) in args.iter().enumerate().skip(1) {
-            println!("Argument {} {}", i, arg);
-                if is_flag(arg) {
-                    println!("Found a flag")
-                }
-        }
 }
