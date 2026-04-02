@@ -47,7 +47,6 @@ fn main() {
     let paths = crawl_paths(starting_path);
 
     for path in paths {
-        println!("{}", path.display());
-        look_for_match_in_file(&path, "lorem");
+        look_for_match_in_file(&path, "ipsum");
     }
 }
