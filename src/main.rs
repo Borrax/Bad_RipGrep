@@ -3,7 +3,7 @@ use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
 use std::collections::VecDeque;
 
-fn crawl_paths(starting_path: &Path, general_queue: &mut VecDeque<PathBuf>) -> Vec<PathBuf> {
+fn crawl_paths(starting_path: &Path, paths_queue: &mut VecDeque<PathBuf>) -> Vec<PathBuf> {
     let mut found_paths = Vec::new();
     let mut found_dirs = Vec::<PathBuf>::new();
 
@@ -15,12 +15,13 @@ fn crawl_paths(starting_path: &Path, general_queue: &mut VecDeque<PathBuf>) -> V
         if curr_path.is_dir() {
             found_dirs.push(curr_path);
         } else {
+            paths_queue.push_back(curr_path);
             found_paths.push(curr_path);
         }
     }
 
     for dir_path in found_dirs {
-        found_paths.extend(crawl_paths(&dir_path, general_queue));
+        found_paths.extend(crawl_paths(&dir_path, paths_queue));
     }
 
     found_paths
