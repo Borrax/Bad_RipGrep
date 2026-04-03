@@ -1,8 +1,9 @@
 use std::fs;
 use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
+use std::collections::VecDeque;
 
-fn crawl_paths(starting_path: &Path) -> Vec<PathBuf> {
+fn crawl_paths(starting_path: &Path, general_queue: &mut VecDeque<PathBuf>) -> Vec<PathBuf> {
     let mut found_paths = Vec::new();
     let mut found_dirs = Vec::<PathBuf>::new();
 
@@ -19,7 +20,7 @@ fn crawl_paths(starting_path: &Path) -> Vec<PathBuf> {
     }
 
     for dir_path in found_dirs {
-        found_paths.extend(crawl_paths(&dir_path));
+        found_paths.extend(crawl_paths(&dir_path, general_queue));
     }
 
     found_paths
@@ -44,8 +45,9 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
 
 fn main() {
     let starting_path = Path::new("./");
+    let mut general_queue: VecDeque<PathBuf> = VecDeque::new();
     
-    let paths = crawl_paths(starting_path);
+    let paths = crawl_paths(starting_path, &mut general_queue);
 
     for path in paths {
         look_for_match_in_file(&path, "ipsum");
