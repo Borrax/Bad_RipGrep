@@ -1,10 +1,14 @@
+use std::collections::VecDeque;
 use std::fs;
 use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
-use std::collections::VecDeque;
+use std::sync::{Arc, Mutex};
 
-fn crawl_paths(starting_path: &Path, paths_queue: &mut VecDeque<PathBuf>) {
+type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
+
+fn crawl_paths(starting_path: &Path, paths_mutex_queue: &GlobalPathQueue) {
     let mut found_dirs = Vec::<PathBuf>::new();
+    let mut paths_queue = paths_mutex_queue.lock().unwrap();
 
     let entries = fs::read_dir(starting_path).unwrap();
 
@@ -19,7 +23,7 @@ fn crawl_paths(starting_path: &Path, paths_queue: &mut VecDeque<PathBuf>) {
     }
 
     for dir_path in found_dirs {
-        crawl_paths(&dir_path, paths_queue);
+        crawl_paths(&dir_path, paths_mutex_queue);
     }
 }
 
@@ -42,11 +46,12 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
 
 fn main() {
     let starting_path = Path::new("./");
-    let mut general_queue: VecDeque<PathBuf> = VecDeque::new();
-    
-    crawl_paths(starting_path, &mut general_queue);
+    let mutex_queue: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
 
-    while let Some(val) = general_queue.pop_front() {
-        println!("{}", val.display());
-    }
+    let queue_clone = Arc::clone(&mutex_queue);
+    crawl_paths(starting_path, &queue_clone);
+
+    // while let Some(val) = queue_clone.pop_front() {
+    //     println!("{}", val.display());
+    // }
 }
