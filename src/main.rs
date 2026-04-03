@@ -8,7 +8,6 @@ type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
 fn crawl_paths(starting_path: &Path, paths_mutex_queue: &GlobalPathQueue) {
     let mut found_dirs = Vec::<PathBuf>::new();
-    let mut paths_queue = paths_mutex_queue.lock().unwrap();
 
     let entries = fs::read_dir(starting_path).unwrap();
 
@@ -18,6 +17,7 @@ fn crawl_paths(starting_path: &Path, paths_mutex_queue: &GlobalPathQueue) {
         if curr_path.is_dir() {
             found_dirs.push(curr_path);
         } else {
+            let mut paths_queue = paths_mutex_queue.lock().unwrap();
             paths_queue.push_back(curr_path);
         }
     }
@@ -51,7 +51,9 @@ fn main() {
     let queue_clone = Arc::clone(&mutex_queue);
     crawl_paths(starting_path, &queue_clone);
 
-    // while let Some(val) = queue_clone.pop_front() {
-    //     println!("{}", val.display());
-    // }
+    let mut paths_q  = queue_clone.lock().unwrap();
+
+    while let Some(val) = paths_q.pop_front() {
+        println!("{}", val.display());
+    }
 }
