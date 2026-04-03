@@ -3,8 +3,7 @@ use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
 use std::collections::VecDeque;
 
-fn crawl_paths(starting_path: &Path, paths_queue: &mut VecDeque<PathBuf>) -> Vec<PathBuf> {
-    let mut found_paths = Vec::new();
+fn crawl_paths(starting_path: &Path, paths_queue: &mut VecDeque<PathBuf>) {
     let mut found_dirs = Vec::<PathBuf>::new();
 
     let entries = fs::read_dir(starting_path).unwrap();
@@ -16,15 +15,12 @@ fn crawl_paths(starting_path: &Path, paths_queue: &mut VecDeque<PathBuf>) -> Vec
             found_dirs.push(curr_path);
         } else {
             paths_queue.push_back(curr_path);
-            found_paths.push(curr_path);
         }
     }
 
     for dir_path in found_dirs {
-        found_paths.extend(crawl_paths(&dir_path, paths_queue));
+        crawl_paths(&dir_path, paths_queue);
     }
-
-    found_paths
 }
 
 fn look_for_match_in_file(path: &Path, search_str: &str) {
@@ -48,9 +44,9 @@ fn main() {
     let starting_path = Path::new("./");
     let mut general_queue: VecDeque<PathBuf> = VecDeque::new();
     
-    let paths = crawl_paths(starting_path, &mut general_queue);
+    crawl_paths(starting_path, &mut general_queue);
 
-    for path in paths {
-        look_for_match_in_file(&path, "ipsum");
+    while let Some(val) = general_queue.pop_front() {
+        println!("{}", val.display());
     }
 }
