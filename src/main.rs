@@ -3,6 +3,7 @@ use std::fs;
 use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
+use std::thread;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
@@ -44,16 +45,41 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
     }
 }
 
+fn search_worker(paths_mutex_queue: GlobalPathQueue) {
+    loop {
+        let path = {
+            let mut q = paths_mutex_queue.lock().unwrap();
+            q.pop_front()
+        };
+
+        let path = match path {
+            Some(val) => val,
+            None => break,
+        };
+
+        
+        look_for_match_in_file(&path, "ipsum");
+    }
+
+}
+
 fn main() {
+    let num_threads = 6;
     let starting_path = Path::new("./");
     let mutex_queue: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
+    let mut handles = Vec::new();
 
     let queue_clone = Arc::clone(&mutex_queue);
     crawl_paths(starting_path, &queue_clone);
 
-    let mut paths_q  = queue_clone.lock().unwrap();
+    for _ in 0..num_threads {
+        let q = Arc::clone(&mutex_queue);
 
-    while let Some(val) = paths_q.pop_front() {
-        println!("{}", val.display());
+        let handle = thread::spawn(move || search_worker(q));
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().unwrap();
     }
 }
