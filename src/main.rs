@@ -69,20 +69,19 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 
 }
 
-fn paths_worker(starting_path: &Path, paths_queue: &GlobalPathQueue) {
+fn paths_worker(starting_path: &Path, paths_queue: &GlobalPathQueue, dir_paths_queue: &GlobalPathQueue) {
     loop {
-        let mut found_dirs = Vec::<PathBuf>::new();
-
         let entries = fs::read_dir(starting_path).unwrap();
 
         for entry in entries.flatten() {
             let curr_path = entry.path();
 
             if curr_path.is_dir() {
-                found_dirs.push(curr_path);
+                let mut queue = dir_paths_queue.lock().unwrap();
+                queue.push_back(curr_path);
             } else {
-                let mut paths_queue = paths_mutex_queue.lock().unwrap();
-                paths_queue.push_back(curr_path);
+                let mut queue = paths_queue.lock().unwrap();
+                queue.push_back(curr_path);
             }
         }
     }
