@@ -69,8 +69,18 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 
 }
 
-fn paths_worker(starting_path: &Path, paths_queue: &GlobalPathQueue, dir_paths_queue: &GlobalPathQueue) {
+fn paths_worker(paths_queue: &GlobalPathQueue, dir_paths_queue: &GlobalPathQueue) {
     loop {
+        let starting_path = {
+            let mut q = dir_paths_queue.lock().unwrap();
+            q.pop_front()
+        };
+
+        let starting_path = match starting_path {
+            Some(val) => val,
+            None => continue,
+        };
+
         let entries = fs::read_dir(starting_path).unwrap();
 
         for entry in entries.flatten() {
@@ -97,6 +107,13 @@ fn main() {
 
     let queue_clone = Arc::clone(&mutex_queue);
     crawl_paths(starting_path, &queue_clone);
+
+    for _ in 0..num_threads {
+        let path_q = Arc::clone(&mutex_queue);
+        let dir_path_q = Arc::clone(&mutex_queue_dirs);
+
+        let handle = tread::spawn(move || paths_worker(paths_queue, dir_paths_queue);
+    }
 
     for _ in 0..num_threads {
         let q = Arc::clone(&mutex_queue);
