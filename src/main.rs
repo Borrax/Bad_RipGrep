@@ -69,7 +69,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 
 }
 
-fn paths_worker(paths_queue: &GlobalPathQueue, dir_paths_queue: &GlobalPathQueue) {
+fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue) {
     loop {
         let starting_path = {
             let mut q = dir_paths_queue.lock().unwrap();
@@ -87,11 +87,11 @@ fn paths_worker(paths_queue: &GlobalPathQueue, dir_paths_queue: &GlobalPathQueue
             let curr_path = entry.path();
 
             if curr_path.is_dir() {
-                let mut queue = dir_paths_queue.lock().unwrap();
-                queue.push_back(curr_path);
+                let mut dir_queue = dir_paths_queue.lock().unwrap();
+                dir_queue.push_back(curr_path);
             } else {
-                let mut queue = paths_queue.lock().unwrap();
-                queue.push_back(curr_path);
+                let mut path_queue = paths_queue.lock().unwrap();
+                path_queue.push_back(curr_path);
             }
         }
     }
@@ -100,29 +100,36 @@ fn paths_worker(paths_queue: &GlobalPathQueue, dir_paths_queue: &GlobalPathQueue
 fn main() {
     let num_threads = 6;
     let starting_path = Path::new("./");
-    let mutex_queue: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
+    let mutex_queue_paths: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
     let mutex_queue_dirs: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
 
-    let mut handles = Vec::new();
+    let mut search_handles = Vec::new();
+    let mut path_handles = Vec::new();
 
-    let queue_clone = Arc::clone(&mutex_queue);
+    let queue_clone = Arc::clone(&mutex_queue_paths);
     crawl_paths(starting_path, &queue_clone);
 
     for _ in 0..num_threads {
-        let path_q = Arc::clone(&mutex_queue);
+        let path_q = Arc::clone(&mutex_queue_paths);
         let dir_path_q = Arc::clone(&mutex_queue_dirs);
 
-        let handle = tread::spawn(move || paths_worker(paths_queue, dir_paths_queue);
+        let handle = thread::spawn(move || paths_worker(path_q, dir_path_q));
+
+        path_handles.push(handle);
+    }
+
+    for handle in path_handles {
+        handle.join().unwrap();
     }
 
     for _ in 0..num_threads {
-        let q = Arc::clone(&mutex_queue);
+        let q = Arc::clone(&mutex_queue_paths);
 
         let handle = thread::spawn(move || search_worker(q));
-        handles.push(handle);
+        search_handles.push(handle);
     }
 
-    for handle in handles {
+    for handle in search_handles {
         handle.join().unwrap();
     }
 }
