@@ -2,10 +2,16 @@ use std::collections::VecDeque;
 use std::fs;
 use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, mpsc::{self, Sender, Receiver}};
 use std::thread;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
+
+#[derive(Clone, Debug)]
+enum AppEvent {
+    NewDirPathPushed,
+    Shutdown,
+}
 
 fn crawl_paths(starting_path: &Path, paths_mutex_queue: &GlobalPathQueue) {
     let mut found_dirs = Vec::<PathBuf>::new();
@@ -63,7 +69,13 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 
 }
 
+fn paths_worker(starting_path: &Path, paths_queue: &GlobalPathQueue) {
+
+}
+
 fn main() {
+    let found_dir_path_ev = Arc::new(AtomicBool::new(false));
+
     let num_threads = 6;
     let starting_path = Path::new("./");
     let mutex_queue: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
