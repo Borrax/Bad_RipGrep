@@ -70,15 +70,30 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 }
 
 fn paths_worker(starting_path: &Path, paths_queue: &GlobalPathQueue) {
+    loop {
+        let mut found_dirs = Vec::<PathBuf>::new();
 
+        let entries = fs::read_dir(starting_path).unwrap();
+
+        for entry in entries.flatten() {
+            let curr_path = entry.path();
+
+            if curr_path.is_dir() {
+                found_dirs.push(curr_path);
+            } else {
+                let mut paths_queue = paths_mutex_queue.lock().unwrap();
+                paths_queue.push_back(curr_path);
+            }
+        }
+    }
 }
 
 fn main() {
-    let found_dir_path_ev = Arc::new(AtomicBool::new(false));
-
     let num_threads = 6;
     let starting_path = Path::new("./");
     let mutex_queue: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
+    let mutex_queue_dirs: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
+
     let mut handles = Vec::new();
 
     let queue_clone = Arc::clone(&mutex_queue);
