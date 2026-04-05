@@ -99,15 +99,15 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue) 
 
 fn main() {
     let num_threads = 6;
-    let starting_path = Path::new("./");
+    let starting_path = PathBuf::from("./");
     let mutex_queue_paths: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
-    let mutex_queue_dirs: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
+    let mutex_queue_dirs: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::from([starting_path])));
 
     let mut search_handles = Vec::new();
     let mut path_handles = Vec::new();
 
-    let queue_clone = Arc::clone(&mutex_queue_paths);
-    crawl_paths(starting_path, &queue_clone);
+    // let queue_clone = Arc::clone(&mutex_queue_paths);
+    // crawl_paths(starting_path, &queue_clone);
 
     for _ in 0..num_threads {
         let path_q = Arc::clone(&mutex_queue_paths);
