@@ -1,8 +1,8 @@
 use std::collections::VecDeque;
-use std::fs;
+use std::{fs, num};
 use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, mpsc::{self, Sender, Receiver}};
+use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
@@ -69,8 +69,11 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 
 }
 
-fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue, still_finding_paths: Arc<Mutex<Vec<bool>>>) {
+fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue, 
+    still_finding_paths: Arc<Mutex<Vec<bool>>>, idx: u32) {
     loop {
+        
+
         let starting_path = {
             let mut q = dir_paths_queue.lock().unwrap();
             q.pop_front()
@@ -103,7 +106,9 @@ fn main() {
     let mutex_queue_paths: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
     let mutex_queue_dirs: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::from([starting_path])));
     // boolean array to check if a thread is still searching for paths
-    let still_finding_paths = Arc::new(Mutex::new(vec![false; num_threads]));
+    let still_finding_paths = Arc::new(
+        (0..num_threads).map(|_| AtomicBool::new(false)).collect()
+    );
 
 
     let mut search_handles = Vec::new();
@@ -112,12 +117,12 @@ fn main() {
     // let queue_clone = Arc::clone(&mutex_queue_paths);
     // crawl_paths(starting_path, &queue_clone);
 
-    for _ in 0..num_threads {
+    for idx in 0..num_threads {
         let path_q = Arc::clone(&mutex_queue_paths);
         let dir_path_q = Arc::clone(&mutex_queue_dirs);
         let still_finding_paths_clone = Arc::clone(&still_finding_paths);
 
-        let handle = thread::spawn(move || paths_worker(path_q, dir_path_q, still_finding_paths_clone));
+        let handle = thread::spawn(move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx));
 
         path_handles.push(handle);
     }
