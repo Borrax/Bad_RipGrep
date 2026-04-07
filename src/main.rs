@@ -70,7 +70,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 }
 
 fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue, 
-    still_finding_paths: Arc<Mutex<Vec<bool>>>, idx: u32) {
+    still_finding_paths: Arc<Vec<AtomicBool>>, idx: u32) {
     loop {
         
 
@@ -80,7 +80,10 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
         };
 
         let starting_path = match starting_path {
-            Some(val) => val,
+            Some(val) => {
+                still_finding_paths[idx].store(true, Ordering::Relaxed);
+                val
+            },
             None => continue,
         };
 
@@ -122,7 +125,9 @@ fn main() {
         let dir_path_q = Arc::clone(&mutex_queue_dirs);
         let still_finding_paths_clone = Arc::clone(&still_finding_paths);
 
-        let handle = thread::spawn(move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx));
+        let handle = thread::spawn(
+            move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx)
+        );
 
         path_handles.push(handle);
     }
