@@ -69,7 +69,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 
 }
 
-fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue) {
+fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue, still_finding_paths: Arc<Mutex<Vec<bool>>>) {
     loop {
         let starting_path = {
             let mut q = dir_paths_queue.lock().unwrap();
@@ -102,6 +102,9 @@ fn main() {
     let starting_path = PathBuf::from("./");
     let mutex_queue_paths: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
     let mutex_queue_dirs: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::from([starting_path])));
+    // boolean array to check if a thread is still searching for paths
+    let still_finding_paths = Arc::new(Mutex::new(vec![false; num_threads]));
+
 
     let mut search_handles = Vec::new();
     let mut path_handles = Vec::new();
@@ -112,8 +115,9 @@ fn main() {
     for _ in 0..num_threads {
         let path_q = Arc::clone(&mutex_queue_paths);
         let dir_path_q = Arc::clone(&mutex_queue_dirs);
+        let still_finding_paths_clone = Arc::clone(&still_finding_paths);
 
-        let handle = thread::spawn(move || paths_worker(path_q, dir_path_q));
+        let handle = thread::spawn(move || paths_worker(path_q, dir_path_q, still_finding_paths_clone));
 
         path_handles.push(handle);
     }
