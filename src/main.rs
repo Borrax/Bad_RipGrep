@@ -102,6 +102,9 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
                 path_queue.push_back(curr_path);
             }
         }
+
+
+        still_finding_paths[idx].store(false, Ordering::Relaxed);
     }
 }
 
