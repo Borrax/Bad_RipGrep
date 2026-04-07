@@ -72,7 +72,9 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue, 
     still_finding_paths: Arc<Vec<AtomicBool>>, idx: u32) {
     loop {
-        
+        if still_finding_paths.iter().all(|b| !b.load(Ordering::Relaxed)) {
+            break;
+        }
 
         let starting_path = {
             let mut q = dir_paths_queue.lock().unwrap();
