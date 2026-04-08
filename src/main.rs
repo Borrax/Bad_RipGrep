@@ -101,7 +101,7 @@ fn main() {
     );
 
 
-    let mut path_handles = Vec::new();
+    let mut handles = Vec::new();
 
     // let queue_clone = Arc::clone(&mutex_queue_paths);
     // crawl_paths(starting_path, &queue_clone);
@@ -111,22 +111,21 @@ fn main() {
         let dir_path_q = Arc::clone(&mutex_queue_dirs);
         let still_finding_paths_clone = Arc::clone(&still_finding_paths);
 
-        let handle = thread::spawn(
-            move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx)
-        );
-
-        path_handles.push(handle);
-
         let path_q2 = Arc::clone(&mutex_queue_paths);
         let dir_path_q2 = Arc::clone(&mutex_queue_dirs);
         let still_finding_paths_clone2 = Arc::clone(&still_finding_paths);
 
+        let path_handle = thread::spawn(
+            move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx)
+        );
+
         let handle_search = thread::spawn(move || search_worker(path_q2, dir_path_q2, still_finding_paths_clone2));
 
-        path_handles.push(handle_search);
+        handles.push(handle_search);
+        handles.push(path_handle);
     }
 
-    for handle in path_handles {
+    for handle in handles {
         handle.join().unwrap();
     }
 }
