@@ -24,8 +24,15 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
     }
 }
 
-fn search_worker(paths_mutex_queue: GlobalPathQueue) {
+fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
+    still_finding_paths: Arc<Vec<AtomicBool>>) {
     loop {
+        let no_new_paths_coming = still_finding_paths.iter().all(|b| !b.load(Ordering::Relaxed));
+
+        if no_new_paths_coming && dir_paths_queue.lock().unwrap().is_empty() {
+            break;
+        }
+
         let path = {
             let mut q = paths_mutex_queue.lock().unwrap();
             q.pop_front()
@@ -33,7 +40,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 
         let path = match path {
             Some(val) => val,
-            None => break,
+            None => continue,
         };
 
         
@@ -94,7 +101,6 @@ fn main() {
     );
 
 
-    let mut search_handles = Vec::new();
     let mut path_handles = Vec::new();
 
     // let queue_clone = Arc::clone(&mutex_queue_paths);
@@ -110,20 +116,17 @@ fn main() {
         );
 
         path_handles.push(handle);
+
+        let path_q2 = Arc::clone(&mutex_queue_paths);
+        let dir_path_q2 = Arc::clone(&mutex_queue_dirs);
+        let still_finding_paths_clone2 = Arc::clone(&still_finding_paths);
+
+        let handle_search = thread::spawn(move || search_worker(path_q2, dir_path_q2, still_finding_paths_clone2));
+
+        path_handles.push(handle_search);
     }
 
     for handle in path_handles {
-        handle.join().unwrap();
-    }
-
-    for _ in 0..num_threads {
-        let q = Arc::clone(&mutex_queue_paths);
-
-        let handle = thread::spawn(move || search_worker(q));
-        search_handles.push(handle);
-    }
-
-    for handle in search_handles {
         handle.join().unwrap();
     }
 }
