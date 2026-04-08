@@ -1,38 +1,11 @@
 use std::collections::VecDeque;
-use std::{fs, num};
+use std::{fs};
 use std::io::{BufReader, BufRead};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
-
-#[derive(Clone, Debug)]
-enum AppEvent {
-    NewDirPathPushed,
-    Shutdown,
-}
-
-fn crawl_paths(starting_path: &Path, paths_mutex_queue: &GlobalPathQueue) {
-    let mut found_dirs = Vec::<PathBuf>::new();
-
-    let entries = fs::read_dir(starting_path).unwrap();
-
-    for entry in entries.flatten() {
-        let curr_path = entry.path();
-
-        if curr_path.is_dir() {
-            found_dirs.push(curr_path);
-        } else {
-            let mut paths_queue = paths_mutex_queue.lock().unwrap();
-            paths_queue.push_back(curr_path);
-        }
-    }
-
-    for dir_path in found_dirs {
-        crawl_paths(&dir_path, paths_mutex_queue);
-    }
-}
 
 fn look_for_match_in_file(path: &Path, search_str: &str) {
     let file = fs::File::open(path).expect("Could not open the file");
