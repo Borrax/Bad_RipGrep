@@ -25,7 +25,7 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
 }
 
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
-    still_finding_paths: Arc<Vec<AtomicBool>>) {
+    still_finding_paths: Arc<Vec<AtomicBool>>, search_str: &str) {
     loop {
         let no_new_paths_coming = still_finding_paths.iter().all(|b| !b.load(Ordering::Relaxed));
 
@@ -44,7 +44,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
         };
 
         
-        look_for_match_in_file(&path, "ipsum");
+        look_for_match_in_file(&path, search_str);
     }
 
 }
@@ -100,6 +100,8 @@ fn main() {
         (0..num_threads).map(|_| AtomicBool::new(false)).collect()
     );
 
+    let search_word = "ipsum";
+
 
     let mut handles = Vec::new();
 
@@ -119,7 +121,7 @@ fn main() {
             move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx)
         );
 
-        let handle_search = thread::spawn(move || search_worker(path_q2, dir_path_q2, still_finding_paths_clone2));
+        let handle_search = thread::spawn(move || search_worker(path_q2, dir_path_q2, still_finding_paths_clone2, search_word));
 
         handles.push(handle_search);
         handles.push(path_handle);
