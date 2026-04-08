@@ -70,9 +70,11 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue) {
 }
 
 fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue, 
-    still_finding_paths: Arc<Vec<AtomicBool>>, idx: usize) {
+    still_finding_paths: Arc<Vec<AtomicBool>>, thread_idx: usize) {
     loop {
-        if still_finding_paths.iter().all(|b| !b.load(Ordering::Relaxed)) {
+        let no_new_paths_coming = still_finding_paths.iter().all(|b| !b.load(Ordering::Relaxed));
+
+        if no_new_paths_coming && dir_paths_queue.lock().unwrap().is_empty() {
             break;
         }
 
@@ -83,7 +85,7 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 
         let starting_path = match starting_path {
             Some(val) => {
-                still_finding_paths[idx].store(true, Ordering::Relaxed);
+                still_finding_paths[thread_idx].store(true, Ordering::Relaxed);
                 val
             },
             None => continue,
@@ -104,7 +106,7 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
         }
 
 
-        still_finding_paths[idx].store(false, Ordering::Relaxed);
+        still_finding_paths[thread_idx].store(false, Ordering::Relaxed);
     }
 }
 
