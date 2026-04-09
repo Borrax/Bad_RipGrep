@@ -154,5 +154,9 @@ mod tests {
         let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
         search_word = String::from_iter(chars);
         look_for_match_in_file(path, &search_word);
+
+        //testing with an empty string
+        search_word = "".to_string();
+        look_for_match_in_file(path, &search_word);
     }   
 }
