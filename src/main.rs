@@ -138,3 +138,16 @@ fn main() {
         handle.join().unwrap();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_look_for_match_in_file() {
+        let path: &Path = Path::new("./test.txt");
+        let search_word: &str = "ipsum";
+
+        look_for_match_in_file(path, search_word);
+    }
+}
