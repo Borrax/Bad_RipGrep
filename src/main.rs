@@ -44,7 +44,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
         };
 
         
-        look_for_match_in_file(&path, search_str);
+        look_for_match_in_file(&path, &search_str);
     }
 
 }
@@ -111,9 +111,9 @@ fn main() {
 
     let mut handles = Vec::new();
 
-    // let queue_clone = Arc::clone(&mutex_queue_paths);
-    // crawl_paths(starting_path, &queue_clone);
 
+    // Spawn a fixed number of threads that would concurrently find paths
+    // and search files for a match
     for idx in 0..num_threads {
         let path_q = Arc::clone(&mutex_queue_paths);
         let dir_path_q = Arc::clone(&mutex_queue_dirs);
