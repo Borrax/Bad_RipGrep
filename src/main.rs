@@ -140,23 +140,41 @@ fn main() {
 }
 
 #[cfg(test)]
-mod tests {
+mod test_look_for_match_in_file {
     use super::*;
 
     #[test]
-    fn test_look_for_match_in_file() {
+    fn test_single_match() {
         let path: &Path = Path::new("./test.txt");
 
-        let mut search_word: String = String::from("ipsum");
-        look_for_match_in_file(path, &search_word);
-
-        // testing with a missing word
-        let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
-        search_word = String::from_iter(chars);
-        look_for_match_in_file(path, &search_word);
-
-        //testing with an empty string
-        search_word = "".to_string();
+        let chars = ['c', 'u', 'p', 'i'];
+        let search_word: String = String::from_iter(chars);
         look_for_match_in_file(path, &search_word);
     }   
+
+    #[test]
+    fn test_more_matches() {
+        let path: &Path = Path::new("./test.txt");
+
+        let chars = ['i', 'p', 's', 'u', 'm'];
+        let search_word: String = String::from_iter(chars);
+        look_for_match_in_file(path, &search_word);
+    }   
+
+    #[test]
+    fn test_non_existent_word() {
+        let path: &Path = Path::new("./test.txt");
+
+        let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
+        let search_word = String::from_iter(chars);
+        look_for_match_in_file(path, &search_word);
+    }
+
+    #[test]
+    fn test_empty_string_seatch() {
+        let path: &Path = Path::new("./test.txt");
+
+        let search_word = "".to_string();
+        look_for_match_in_file(path, &search_word);
+    }
 }
