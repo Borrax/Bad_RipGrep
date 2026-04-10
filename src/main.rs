@@ -1,13 +1,14 @@
 use std::collections::VecDeque;
 use std::{fs};
-use std::io::{BufReader, BufRead};
+use std::io::{BufReader, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
-fn look_for_match_in_file(path: &Path, search_str: &str) {
+fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
+    out: &mut W) -> std::io::Result<()>{
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
     let max_line_length = 60;
@@ -19,9 +20,11 @@ fn look_for_match_in_file(path: &Path, search_str: &str) {
         };
 
         if line.contains(search_str) {
-            println!("{}: {:.max_line_length$}", index + 1, line);
+            // println!("{}: {:.max_line_length$}", index + 1, line);
+            writeln!(out, "{}: {:.max_line_length$}", index + 1, line)?;
         }
     }
+   Ok(()) 
 }
 
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
@@ -44,7 +47,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
         };
 
         
-        look_for_match_in_file(&path, &search_str);
+        look_for_match_in_file(&path, &search_str, &mut std::io::stdout());
     }
 
 }
