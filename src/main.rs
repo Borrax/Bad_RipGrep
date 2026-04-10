@@ -145,11 +145,10 @@ fn main() {
 #[cfg(test)]
 mod test_look_for_match_in_file {
     use super::*;
+    const path: &Path = Path::new("./test.txt");
 
     #[test]
     fn test_single_match() {
-        let path: &Path = Path::new("./test.txt");
-
         let chars = ['c', 'u', 'p', 'i'];
         let search_word: String = String::from_iter(chars);
         look_for_match_in_file(path, &search_word);
@@ -157,8 +156,6 @@ mod test_look_for_match_in_file {
 
     #[test]
     fn test_more_matches() {
-        let path: &Path = Path::new("./test.txt");
-
         let chars = ['i', 'p', 's', 'u', 'm'];
         let search_word: String = String::from_iter(chars);
         look_for_match_in_file(path, &search_word);
@@ -166,8 +163,6 @@ mod test_look_for_match_in_file {
 
     #[test]
     fn test_non_existent_word() {
-        let path: &Path = Path::new("./test.txt");
-
         let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
         let search_word = String::from_iter(chars);
         look_for_match_in_file(path, &search_word);
@@ -175,8 +170,6 @@ mod test_look_for_match_in_file {
 
     #[test]
     fn test_empty_string_seatch() {
-        let path: &Path = Path::new("./test.txt");
-
         let search_word = "".to_string();
         look_for_match_in_file(path, &search_word);
     }
