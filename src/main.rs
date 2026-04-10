@@ -146,8 +146,8 @@ mod tests {
     #[test]
     fn test_look_for_match_in_file() {
         let path: &Path = Path::new("./test.txt");
-        let mut search_word: String = String::from("ipsum");
 
+        let mut search_word: String = String::from("ipsum");
         look_for_match_in_file(path, &search_word);
 
         // testing with a missing word
