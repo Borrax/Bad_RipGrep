@@ -47,7 +47,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
         };
 
         
-        look_for_match_in_file(&path, &search_str, &mut std::io::stdout());
+        let _ = look_for_match_in_file(&path, &search_str, &mut std::io::stdout());
     }
 
 }
