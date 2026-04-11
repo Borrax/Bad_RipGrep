@@ -25,7 +25,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
             let start = pos.saturating_sub(max_words_around_match);
             let end = (pos + max_words_around_match).min(split_line.len() - 1);
 
-            let print_str = &split_line[start..end].join(" ");
+            let print_str = &split_line[start..=end].join(" ");
 
             writeln!(out, "{}: {}", index + 1, print_str)?;
         }
