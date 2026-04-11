@@ -11,7 +11,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
     out: &mut W) -> std::io::Result<()>{
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
-    let max_line_length = 60;
+    let max_words_around_match = 5;
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -19,11 +19,18 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
             Err(_) => continue,
         };
 
-        if line.contains(search_str) {
-            // println!("{}: {:.max_line_length$}", index + 1, line);
-            writeln!(out, "{}: {:.max_line_length$}", index + 1, line)?;
+        let split_line: Vec<&str> = line.split_whitespace().collect();
+
+        if let Some(pos) = split_line.iter().position(|w| w.contains(search_str)) {
+            let start = (pos - max_words_around_match).max(0);
+            let end = (pos + max_words_around_match).min(split_line.len() - 1);
+
+            let print_str = &split_line[start..end].join(" ");
+
+            writeln!(out, "{}: {}", index + 1, print_str)?;
         }
     }
+
    Ok(()) 
 }
 
