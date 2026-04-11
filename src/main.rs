@@ -147,11 +147,11 @@ mod test_look_for_match_in_file {
     use super::*;
     use std::sync::LazyLock;
 
-    static path: LazyLock<&Path> = LazyLock::new(|| Path::new("./test.txt"));
+    static PATH: LazyLock<&Path> = LazyLock::new(|| Path::new("./test.txt"));
 
     fn run_target(search_word: &str) -> String {
         let mut out = Vec::new();
-        look_for_match_in_file(&path, &search_word, &mut out).unwrap();
+        look_for_match_in_file(&PATH, search_word, &mut out).unwrap();
         String::from_utf8(out).unwrap()
     }
 
