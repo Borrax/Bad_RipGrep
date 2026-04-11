@@ -22,7 +22,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
         let split_line: Vec<&str> = line.split_whitespace().collect();
 
         if let Some(pos) = split_line.iter().position(|w| w.contains(search_str)) {
-            let start = (pos - max_words_around_match).max(0);
+            let start = pos.saturating_sub(max_words_around_match);
             let end = (pos + max_words_around_match).min(split_line.len() - 1);
 
             let print_str = &split_line[start..end].join(" ");
@@ -172,23 +172,25 @@ mod test_look_for_match_in_file {
         assert!(result.contains(&search_word));
     }   
 
-    // #[test]
-    // fn test_more_matches() {
-    //     let chars = ['i', 'p', 's', 'u', 'm'];
-    //     let search_word: String = String::from_iter(chars);
-    //     look_for_match_in_file(path, &search_word);
-    // }   
-    //
+    #[test]
+    fn test_more_matches() {
+        let chars = ['i', 'p', 's', 'u', 'm'];
+        let search_word: String = String::from_iter(chars);
+        let result = run_target(&search_word);
+        
+        println!("{}", result);
+    }   
+
     // #[test]
     // fn test_non_existent_word() {
     //     let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
     //     let search_word = String::from_iter(chars);
-    //     look_for_match_in_file(path, &search_word);
+    //     let result = run_target(&search_word);
     // }
     //
     // #[test]
     // fn test_empty_string_seatch() {
     //     let search_word = "".to_string();
-    //     look_for_match_in_file(path, &search_word);
+    //     let result = run_target(&search_word);
     // }
 }
