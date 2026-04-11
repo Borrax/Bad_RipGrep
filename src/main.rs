@@ -1,5 +1,5 @@
 use std::collections::VecDeque;
-use std::{fs};
+use std::fs;
 use std::io::{BufReader, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
@@ -168,6 +168,8 @@ mod test_look_for_match_in_file {
         let search_word: String = String::from_iter(chars);
         // look_for_match_in_file(path, &search_word);
         let result = run_target(&search_word);
+
+        assert!(result.contains(&search_word));
     }   
 
     // #[test]
