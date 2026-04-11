@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 use std::{fs};
 use std::io::{BufReader, BufRead, Write};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}, LazyLock};
+use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
@@ -145,6 +145,8 @@ fn main() {
 #[cfg(test)]
 mod test_look_for_match_in_file {
     use super::*;
+    use std::sync::LazyLock;
+
     static path: LazyLock<&Path> = LazyLock::new(|| Path::new("./test.txt"));
 
     fn run_target(search_word: &str) -> String {
