@@ -188,12 +188,14 @@ mod test_look_for_match_in_file {
         }
     }   
 
-    // #[test]
-    // fn test_non_existent_word() {
-    //     let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
-    //     let search_word = String::from_iter(chars);
-    //     let result = run_target(&search_word);
-    // }
+    #[test]
+    fn test_non_existent_word() {
+        let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
+        let search_word = String::from_iter(chars);
+        let result = run_target(&search_word);
+
+        assert_eq!("", result);
+    }
     //
     // #[test]
     // fn test_empty_string_seatch() {
