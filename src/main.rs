@@ -179,7 +179,13 @@ mod test_look_for_match_in_file {
         let result = run_target(&search_word);
 
         let lines: Vec<&str> = result.split("\n").collect();
+        // last line is empty
         assert_eq!(lines.len(), 4);
+
+        // last line is empty
+        for line in &lines[0..lines.len() - 1] {
+            assert!(line.contains(&search_word));
+        }
     }   
 
     // #[test]
