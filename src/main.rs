@@ -198,12 +198,26 @@ mod test_look_for_match_in_file {
     }
 
     #[test]
-    fn test_empty_string_seatch() {
+    fn test_empty_string_search() {
         let search_word = "".to_string();
         let result = run_target(&search_word);
         
         let lines: Vec<&str> = result.split("\n").collect();
         // Assert no panic and a bunch of matches
         assert!(lines.len() > 1);
+    }
+
+    #[test]
+    fn test_non_existent_path_panics() {
+        let chars = ['i', 'p', 's', 'u', 'm'];
+        let search_word: String = String::from_iter(chars);
+        let path: &Path = Path::new("./test/path");
+
+        let mut out = Vec::new();
+        let result = std::panic::catch_unwind(move || {
+            look_for_match_in_file(path, &search_word, &mut out)
+        });
+
+        assert!(result.is_err());
     }
 }
