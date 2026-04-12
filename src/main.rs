@@ -204,6 +204,6 @@ mod test_look_for_match_in_file {
         
         let lines: Vec<&str> = result.split("\n").collect();
         // Assert no panic and a bunch of matches
-        assert!(lines.len() >= 1);
+        assert!(lines.len() > 1);
     }
 }
