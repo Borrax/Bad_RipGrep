@@ -196,10 +196,14 @@ mod test_look_for_match_in_file {
 
         assert_eq!("", result);
     }
-    //
-    // #[test]
-    // fn test_empty_string_seatch() {
-    //     let search_word = "".to_string();
-    //     let result = run_target(&search_word);
-    // }
+
+    #[test]
+    fn test_empty_string_seatch() {
+        let search_word = "".to_string();
+        let result = run_target(&search_word);
+        
+        let lines: Vec<&str> = result.split("\n").collect();
+        // Assert no panic and a bunch of matches
+        assert!(lines.len() >= 1);
+    }
 }
