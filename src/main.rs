@@ -177,8 +177,9 @@ mod test_look_for_match_in_file {
         let chars = ['i', 'p', 's', 'u', 'm'];
         let search_word: String = String::from_iter(chars);
         let result = run_target(&search_word);
-        
-        println!("{}", result);
+
+        let lines: Vec<&str> = result.split("\n").collect();
+        assert_eq!(lines.len(), 4);
     }   
 
     // #[test]
