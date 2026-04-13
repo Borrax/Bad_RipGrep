@@ -25,7 +25,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
         let split_line: Vec<&str> = line.split_whitespace().collect();
 
         if let Ok(ref re) = re {
-            if let Some(m) = re.clone().find(&line) {
+            if let Some(m) = re.find(&line) {
                 let _ = writeln!(out, "{}: {}", index + 1, m.as_str());
             }
         } else {
