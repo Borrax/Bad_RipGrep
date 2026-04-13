@@ -4,6 +4,7 @@ use std::io::{BufReader, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
+use regex::Regex;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
@@ -12,6 +13,8 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
+
+    let should_use_regex = is_regex(search_str);
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -98,6 +101,10 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 
         still_finding_paths[thread_idx].store(false, Ordering::Relaxed);
     }
+}
+
+fn is_regex(pattern: &str) -> bool {
+    Regex::new(pattern).is_ok()
 }
 
 fn main() {
