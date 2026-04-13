@@ -14,13 +14,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
 
-    let is_input_regex = is_regex(search_str);
-
-    let re = if is_input_regex {
-        Some(Regex::new(search_str).unwrap())
-    } else {
-        None
-    };
+    let re = Regex::new(search_str);
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -30,7 +24,11 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
 
         let split_line: Vec<&str> = line.split_whitespace().collect();
 
-        if is_input_regex {
+        if let Ok(ref re) = re {
+            if let Some(m) = re.clone().find(&line) {
+                let _ = writeln!(out, "{}: {}", index + 1, m.as_str());
+            }
+        } else {
             if let Some(pos) = split_line.iter().position(|w| w.contains(search_str)) {
                 let start = pos.saturating_sub(max_words_around_match);
                 let end = (pos + max_words_around_match).min(split_line.len() - 1);
@@ -38,10 +36,6 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
                 let print_str = &split_line[start..=end].join(" ");
 
                 writeln!(out, "{}: {}", index + 1, print_str)?;
-            }
-        } else {
-            if let Some(m) = re.clone().unwrap().find(&line) {
-                let _ = writeln!(out, "{}: {}", index + 1, m.as_str());
             }
         }
     }
@@ -113,10 +107,6 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 
         still_finding_paths[thread_idx].store(false, Ordering::Relaxed);
     }
-}
-
-fn is_regex(pattern: &str) -> bool {
-    Regex::new(pattern).is_ok()
 }
 
 fn main() {
