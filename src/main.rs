@@ -16,6 +16,12 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
 
     let is_input_regex = is_regex(search_str);
 
+    let re = if is_input_regex {
+        Some(Regex::new(search_str).unwrap())
+    } else {
+        None
+    };
+
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
             Ok(l) => l,
@@ -34,7 +40,9 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
                 writeln!(out, "{}: {}", index + 1, print_str)?;
             }
         } else {
-            writeln!(out, "{}: {}", index + 1, "regex is still work in progress")?;
+            if let Some(m) = re.clone().unwrap().find(&line) {
+                let _ = writeln!(out, "{}: {}", index + 1, m.as_str());
+            }
         }
     }
 
