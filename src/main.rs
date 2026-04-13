@@ -14,7 +14,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
 
-    let should_use_regex = is_regex(search_str);
+    let is_input_regex = is_regex(search_str);
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -24,13 +24,17 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
 
         let split_line: Vec<&str> = line.split_whitespace().collect();
 
-        if let Some(pos) = split_line.iter().position(|w| w.contains(search_str)) {
-            let start = pos.saturating_sub(max_words_around_match);
-            let end = (pos + max_words_around_match).min(split_line.len() - 1);
+        if is_input_regex {
+            if let Some(pos) = split_line.iter().position(|w| w.contains(search_str)) {
+                let start = pos.saturating_sub(max_words_around_match);
+                let end = (pos + max_words_around_match).min(split_line.len() - 1);
 
-            let print_str = &split_line[start..=end].join(" ");
+                let print_str = &split_line[start..=end].join(" ");
 
-            writeln!(out, "{}: {}", index + 1, print_str)?;
+                writeln!(out, "{}: {}", index + 1, print_str)?;
+            }
+        } else {
+            writeln!(out, "{}: {}", index + 1, "regex is still work in progress")?;
         }
     }
 
