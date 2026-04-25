@@ -22,8 +22,6 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
             Err(_) => continue,
         };
 
-        let split_line: Vec<&str> = line.split_whitespace().collect();
-
         if let Ok(ref re) = re {
             if let Some(m) = re.find(&line) {
                 let bytes_before = &line[..m.start()];
@@ -37,14 +35,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
                 let _ = writeln!(out, "{}: {} {} {}", index + 1, words_before, m.as_str(), words_after);
             }
         } else {
-            if let Some(pos) = split_line.iter().position(|w| w.contains(search_str)) {
-                let start = pos.saturating_sub(max_words_around_match);
-                let end = (pos + max_words_around_match).min(split_line.len() - 1);
-
-                let print_str = &split_line[start..=end].join(" ");
-
-                writeln!(out, "{}: {}", index + 1, print_str)?;
-            }
+            panic!("Word/expression can't be matched");
         }
     }
 
