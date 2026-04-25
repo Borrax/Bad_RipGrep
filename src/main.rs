@@ -179,6 +179,14 @@ mod test_look_for_match_in_file {
         let result = run_target(&search_word);
 
         assert!(result.contains(&search_word));
+
+        let splitted_line: Vec<&str> = result.split(&search_word).collect();
+        let words_before = splitted_line[0].split_whitespace().collect::<Vec<&str>>();
+        assert!(words_before.len() <= MAX_WORDS_AROUND_MATCH + 1); // +1 because it will
+                                                                   // include the line index
+
+        let words_after = splitted_line[1].split_whitespace().collect::<Vec<&str>>();
+        assert!(words_after.len() <= MAX_WORDS_AROUND_MATCH);
     }   
 
     #[test]
