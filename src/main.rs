@@ -171,6 +171,16 @@ mod test_look_for_match_in_file {
         String::from_utf8(out).unwrap()
     }
 
+    fn assert_surrounding_words_count(text: &str, search_word: &str) {
+        let splitted_text: Vec<&str> = text.split(search_word).collect();
+        let words_before = splitted_text[0].split_whitespace().collect::<Vec<&str>>();
+        assert!(words_before.len() <= MAX_WORDS_AROUND_MATCH + 1); // +1 because it will
+                                                                   // include the line index
+
+        let words_after = splitted_text[1].split_whitespace().collect::<Vec<&str>>();
+        assert!(words_after.len() <= MAX_WORDS_AROUND_MATCH);
+    }
+
     #[test]
     fn test_single_match() {
         let chars = ['c', 'u', 'p', 'i'];
@@ -180,13 +190,7 @@ mod test_look_for_match_in_file {
 
         assert!(result.contains(&search_word));
 
-        let splitted_line: Vec<&str> = result.split(&search_word).collect();
-        let words_before = splitted_line[0].split_whitespace().collect::<Vec<&str>>();
-        assert!(words_before.len() <= MAX_WORDS_AROUND_MATCH + 1); // +1 because it will
-                                                                   // include the line index
-
-        let words_after = splitted_line[1].split_whitespace().collect::<Vec<&str>>();
-        assert!(words_after.len() <= MAX_WORDS_AROUND_MATCH);
+        assert_surrounding_words_count(&result, &search_word);
     }   
 
     #[test]
@@ -203,13 +207,8 @@ mod test_look_for_match_in_file {
         for line in &lines[0..lines.len() - 1] {
             assert!(line.contains(&search_word));
             
-            let splitted_line: Vec<&str> = line.split(&search_word).collect();
-            let words_before = splitted_line[0].split_whitespace().collect::<Vec<&str>>();
-            assert!(words_before.len() <= MAX_WORDS_AROUND_MATCH + 1); // +1 because it will
-                                                                       // include the line index
+            assert_surrounding_words_count(line, &search_word);
 
-            let words_after = splitted_line[1].split_whitespace().collect::<Vec<&str>>();
-            assert!(words_after.len() <= MAX_WORDS_AROUND_MATCH);
         }
     }   
 
