@@ -163,6 +163,7 @@ mod test_look_for_match_in_file {
     use std::sync::LazyLock;
 
     static PATH: LazyLock<&Path> = LazyLock::new(|| Path::new("./test.txt"));
+    const MAX_WORDS_AROUND_MATCH: usize = 5;
 
     fn run_target(search_word: &str) -> String {
         let mut out = Vec::new();
@@ -193,6 +194,13 @@ mod test_look_for_match_in_file {
         // last line is empty
         for line in &lines[0..lines.len() - 1] {
             assert!(line.contains(&search_word));
+            
+            let splitted_line: Vec<&str> = line.split(&search_word).collect();
+            let words_before = splitted_line[0].split_whitespace().collect::<Vec<&str>>();
+            assert!(words_before.len() <= MAX_WORDS_AROUND_MATCH);
+
+            let words_after = splitted_line[1].split_whitespace().collect::<Vec<&str>>();
+            assert!(words_after.len() <= MAX_WORDS_AROUND_MATCH);
         }
     }   
 
