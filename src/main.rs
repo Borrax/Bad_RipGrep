@@ -212,6 +212,25 @@ mod test_look_for_match_in_file {
     }   
 
     #[test]
+    fn test_bigger_search_string() {
+        let chars = ['d', 'o', 'l', 'o', 'r', ' ', 's', 'i', 't', ' ', 'a', 'm', 'e', 't'];
+        let search_word: String = String::from_iter(chars);
+        let search_re = Regex::new(&search_word).unwrap();
+        let result = run_target(&search_re);
+
+        let lines: Vec<&str> = result.split("\n").collect();
+        // last line is empty
+        assert_eq!(lines.len(), 2);
+
+        // last line is empty
+        for line in &lines[0..lines.len() - 1] {
+            assert!(line.contains(&search_word));
+            
+            assert_surrounding_words_count(line, &search_word);
+        }
+    }   
+
+    #[test]
     fn test_non_existent_word() {
         let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
         let search_word = String::from_iter(chars);
