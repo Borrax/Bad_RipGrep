@@ -162,9 +162,9 @@ mod test_look_for_match_in_file {
     static PATH: LazyLock<&Path> = LazyLock::new(|| Path::new("./test.txt"));
     const MAX_WORDS_AROUND_MATCH: usize = 5;
 
-    fn run_target(search_word: &str) -> String {
+    fn run_target(re: &Regex) -> String {
         let mut out = Vec::new();
-        look_for_match_in_file(&PATH, search_word, &mut out);
+        look_for_match_in_file(&PATH, re, &mut out);
         String::from_utf8(out).unwrap()
     }
 
@@ -182,8 +182,9 @@ mod test_look_for_match_in_file {
     fn test_single_match() {
         let chars = ['c', 'u', 'p', 'i'];
         let search_word: String = String::from_iter(chars);
+        let search_re = Regex::new(&search_word).unwrap();
         // look_for_match_in_file(path, &search_word);
-        let result = run_target(&search_word);
+        let result = run_target(&search_re);
 
         assert!(result.contains(&search_word));
 
@@ -194,7 +195,8 @@ mod test_look_for_match_in_file {
     fn test_more_matches() {
         let chars = ['i', 'p', 's', 'u', 'm'];
         let search_word: String = String::from_iter(chars);
-        let result = run_target(&search_word);
+        let search_re = Regex::new(&search_word).unwrap();
+        let result = run_target(&search_re);
 
         let lines: Vec<&str> = result.split("\n").collect();
         // last line is empty
@@ -213,7 +215,9 @@ mod test_look_for_match_in_file {
     fn test_non_existent_word() {
         let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
         let search_word = String::from_iter(chars);
-        let result = run_target(&search_word);
+        let search_re = Regex::new(&search_word).unwrap();
+
+        let result = run_target(&search_re);
 
         assert_eq!("", result);
     }
@@ -221,7 +225,9 @@ mod test_look_for_match_in_file {
     #[test]
     fn test_empty_string_search() {
         let search_word = "".to_string();
-        let result = run_target(&search_word);
+        let search_re = Regex::new(&search_word).unwrap();
+
+        let result = run_target(&search_re);
         
         let lines: Vec<&str> = result.split("\n").collect();
         // Assert no panic and a bunch of matches
@@ -232,11 +238,12 @@ mod test_look_for_match_in_file {
     fn test_non_existent_path_panics() {
         let chars = ['i', 'p', 's', 'u', 'm'];
         let search_word: String = String::from_iter(chars);
+        let search_re = Regex::new(&search_word).unwrap();
         let path: &Path = Path::new("./test/path");
 
         let mut out = Vec::new();
         let result = std::panic::catch_unwind(move || {
-            look_for_match_in_file(path, &search_word, &mut out)
+            look_for_match_in_file(path, &search_re, &mut out)
         });
 
         assert!(result.is_err());
