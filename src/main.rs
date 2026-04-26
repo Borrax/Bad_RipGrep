@@ -8,16 +8,11 @@ use regex::Regex;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
-fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
+fn look_for_match_in_file<W: Write>(path: &Path, re: &Regex,
     out: &mut W) {
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
-
-    let re = match Regex::new(search_str) {
-        Ok(m) => m,
-        Err(_) => panic!("Word expression can't be matched!")
-    };
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -41,7 +36,7 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
 }
 
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
-    still_finding_paths: Arc<Vec<AtomicBool>>, search_str: String) {
+    still_finding_paths: Arc<Vec<AtomicBool>>, re: Regex) {
     loop {
         let no_new_paths_coming = still_finding_paths.iter().all(|b| !b.load(Ordering::Relaxed));
 
@@ -60,7 +55,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
         };
 
         
-        look_for_match_in_file(&path, &search_str, &mut std::io::stdout());
+        look_for_match_in_file(&path, &re, &mut std::io::stdout());
     }
 
 }
@@ -127,6 +122,10 @@ fn main() {
 
     let mut handles = Vec::new();
 
+    let re = match Regex::new(&search_word) {
+        Ok(m) => m,
+        Err(_) => panic!("Word expression can't be matched!")
+    };
 
     // Spawn a fixed number of threads that would concurrently find paths
     // and search files for a match
@@ -143,8 +142,8 @@ fn main() {
             move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx)
         );
 
-        let search_str = search_word.clone();
-        let handle_search = thread::spawn(move || search_worker(path_q2, dir_path_q2, still_finding_paths_clone2, search_str));
+        let cloned_re = re.clone();
+        let handle_search = thread::spawn(move || search_worker(path_q2, dir_path_q2, still_finding_paths_clone2, cloned_re));
 
         handles.push(handle_search);
         handles.push(path_handle);
