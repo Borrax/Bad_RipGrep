@@ -14,7 +14,10 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
 
-    let re = Regex::new(search_str);
+    let re = match Regex::new(search_str) {
+        Ok(m) => m,
+        Err(_) => panic!("Word expression can't be matched!")
+    };
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -22,20 +25,16 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
             Err(_) => continue,
         };
 
-        if let Ok(ref re) = re {
-            if let Some(m) = re.find(&line) {
-                let bytes_before = &line[..m.start()];
-                let bytes_after = &line[m.end()..];
+        if let Some(m) = re.find(&line) {
+            let bytes_before = &line[..m.start()];
+            let bytes_after = &line[m.end()..];
 
-                let words_before: String = bytes_before.split_whitespace().rev().take(max_words_around_match)
-                    .collect::<Vec<&str>>().join(" ");
-                let words_after: String = bytes_after.split_whitespace().take(max_words_around_match)
-                    .collect::<Vec<&str>>().join(" ");
+            let words_before: String = bytes_before.split_whitespace().rev().take(max_words_around_match)
+                .collect::<Vec<&str>>().join(" ");
+            let words_after: String = bytes_after.split_whitespace().take(max_words_around_match)
+                .collect::<Vec<&str>>().join(" ");
 
-                let _ = writeln!(out, "{}: {} {} {}", index + 1, words_before, m.as_str(), words_after);
-            }
-        } else {
-            panic!("Word/expression can't be matched");
+            let _ = writeln!(out, "{}: {} {} {}", index + 1, words_before, m.as_str(), words_after);
         }
     }
 
