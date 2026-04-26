@@ -9,7 +9,7 @@ use regex::Regex;
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
 fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
-    out: &mut W) -> std::io::Result<()>{
+    out: &mut W) {
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
@@ -39,7 +39,6 @@ fn look_for_match_in_file<W: Write>(path: &Path, search_str: &str,
         }
     }
 
-   Ok(()) 
 }
 
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
@@ -62,7 +61,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
         };
 
         
-        let _ = look_for_match_in_file(&path, &search_str, &mut std::io::stdout());
+        look_for_match_in_file(&path, &search_str, &mut std::io::stdout());
     }
 
 }
@@ -167,7 +166,7 @@ mod test_look_for_match_in_file {
 
     fn run_target(search_word: &str) -> String {
         let mut out = Vec::new();
-        look_for_match_in_file(&PATH, search_word, &mut out).unwrap();
+        look_for_match_in_file(&PATH, search_word, &mut out);
         String::from_utf8(out).unwrap()
     }
 
