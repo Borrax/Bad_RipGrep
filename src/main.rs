@@ -231,6 +231,21 @@ mod test_look_for_match_in_file {
     }   
 
     #[test]
+    fn test_regex_expression() {
+        let search_re = Regex::new(r"\bl\w+m\b").unwrap();
+        let result = run_target(&search_re);
+
+        let lines: Vec<&str> = result.split("\n").collect();
+        // last line is empty
+        assert_eq!(lines.len(), 3);
+
+        // last line is empty
+        for line in &lines[0..lines.len() - 1] {
+            assert!(search_re.find(line).is_some());
+        }
+    }   
+
+    #[test]
     fn test_non_existent_word() {
         let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
         let search_word = String::from_iter(chars);
