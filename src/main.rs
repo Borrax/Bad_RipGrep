@@ -73,6 +73,13 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
 
 }
 
+/// Finds file and diretory paths and feels dedicated data structers with them
+///
+/// # Arguments
+/// * `paths_queue` - Queue containing file paths
+/// * `dir_paths_queue` - A queue containing all the untraversed directories
+/// * `still_finding_paths` - Bool vector for every file path finding thread if they are still active
+/// * `thread_idx` - The current thread idx that this function is working in
 fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue, 
     still_finding_paths: Arc<Vec<AtomicBool>>, thread_idx: usize) {
     loop {
