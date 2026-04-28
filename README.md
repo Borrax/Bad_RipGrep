@@ -11,5 +11,16 @@ This implementation is trying to mimic its functionality with the goal of **lear
 cargo run -- <search_word>
 ```
 
+### Testing
+Running unit tests:
+```bash
+cargo test
+```
+
+### Viewing the documentation
+```bash
+cargo doc --open
+```
+
 ### Strategy:
 The implementation will be using a fixed number of threads to find file paths for matching the target word and looking through the found paths concurrently.
