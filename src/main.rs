@@ -1,3 +1,16 @@
+//!  # Bad Rip Grep
+//!  Crawls recursively through directories and prints out all the found matches of a word/regex
+//!  expression 
+//!
+//!  # Usage:
+//!  ```
+//!  cargo run -- <word/expression>
+//!
+//!  ```
+//!  or
+//!  ```
+//!  <built_exe> <word/regex>
+//!  ```
 use std::collections::VecDeque;
 use std::fs;
 use std::io::{BufReader, BufRead, Write};
@@ -120,6 +133,7 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
         still_finding_paths[thread_idx].store(false, Ordering::Relaxed);
     }
 }
+
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
