@@ -8,6 +8,12 @@ use regex::Regex;
 
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
+/// Matches a regex expression through a file
+///
+/// # Arguments
+/// * `path` - The path to the file relative to where the command was ran from
+/// * `re` - The regex expression taht needs to be matched
+/// * `out` - Output buffer the results are written to
 fn look_for_match_in_file<W: Write>(path: &Path, re: &Regex,
     out: &mut W) {
     let file = fs::File::open(path).expect("Could not open the file");
