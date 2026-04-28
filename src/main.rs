@@ -4,12 +4,12 @@
 //!
 //!  # Usage:
 //!  ```
-//!  cargo run -- <word/expression>
+//!  cargo run -- <word/regex>
 //!
 //!  ```
 //!  or
 //!  ```
-//!  <built_exe> <word/regex>
+//!  <built_target> <word/regex>
 //!  ```
 use std::collections::VecDeque;
 use std::fs;
@@ -19,6 +19,8 @@ use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
 use regex::Regex;
 
+/// Alias for a mutex file/dir path containing Queue type
+/// See also [`search_worker`] and [`paths_worker`]
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
 /// Matches a regex expression through a file
@@ -27,6 +29,8 @@ type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 /// * `path` - The path to the file relative to where the command was ran from
 /// * `re` - The regex expression taht needs to be matched
 /// * `out` - Output buffer the results are written to
+///
+/// See also [`search_worker`] and [`paths_worker`]
 fn look_for_match_in_file<W: Write>(path: &Path, re: &Regex,
     out: &mut W) {
     let file = fs::File::open(path).expect("Could not open the file");
@@ -61,6 +65,8 @@ fn look_for_match_in_file<W: Write>(path: &Path, re: &Regex,
 /// * `dir_paths_queue` - A queue containing all the untraversed directories
 /// * `still_finding_paths` - Bool vector for every file path finding thread if they are still active
 /// * `re` - The target regex expression that needs to be matched
+///
+/// See also [`look_for_match_in_file`]
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
     still_finding_paths: Arc<Vec<AtomicBool>>, re: Regex) {
     loop {
