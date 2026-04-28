@@ -41,6 +41,13 @@ fn look_for_match_in_file<W: Write>(path: &Path, re: &Regex,
 
 }
 
+/// Pops file paths from the queue and looks for a match in the file
+///
+/// # Arguments
+/// * `paths_mutex_queue` - Queue containing file paths
+/// * `dir_paths_queue` - A queue containing all the untraversed directories
+/// * `still_finding_paths` - Bool vector for every file path finding thread if they are still active
+/// * `re` - The target regex expression that needs to be matched
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
     still_finding_paths: Arc<Vec<AtomicBool>>, re: Regex) {
     loop {
