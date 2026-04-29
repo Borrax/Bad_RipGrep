@@ -10,5 +10,5 @@ regex = "1"
 criterion = "0.5"
 
 [[bench]]
-name = "overall_bench"
+name = "bad_ripgrep"
 harness = false
