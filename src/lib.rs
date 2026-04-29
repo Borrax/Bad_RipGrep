@@ -128,6 +128,10 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 }
 
 
+/// Starts the whole expression seeking logic
+///
+/// # Arguments
+/// * `search_re` - The regex/word that needs to be found
 pub fn run_application(search_re: Regex) {
     let num_threads = 6;
     let starting_path = PathBuf::from("./");
