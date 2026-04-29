@@ -132,7 +132,7 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 ///
 /// # Arguments
 /// * `search_re` - The regex/word that needs to be found
-pub fn run_application(search_re: Regex) {
+pub fn run_application(search_re: &Regex) {
     let num_threads = 6;
     let starting_path = PathBuf::from("./");
     let mutex_queue_paths: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
