@@ -128,16 +128,7 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 }
 
 
-pub fn run_application() {
-    let args: Vec<String> = std::env::args().collect();
-
-    let search_word = match args.get(1) {
-        Some(s) => s.clone(),
-        None => {
-            panic!("No argument provided")
-        }
-    };
-
+pub fn run_application(search_re: Regex) {
     let num_threads = 6;
     let starting_path = PathBuf::from("./");
     let mutex_queue_paths: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
@@ -149,10 +140,6 @@ pub fn run_application() {
 
     let mut handles = Vec::new();
 
-    let re = match Regex::new(&search_word) {
-        Ok(m) => m,
-        Err(_) => panic!("Word expression can't be matched!")
-    };
 
     // Spawn a fixed number of threads that would concurrently find paths
     // and search files for a match
@@ -169,7 +156,7 @@ pub fn run_application() {
             move || paths_worker(path_q, dir_path_q, still_finding_paths_clone, idx)
         );
 
-        let cloned_re = re.clone();
+        let cloned_re = search_re.clone();
         let handle_search = thread::spawn(move || search_worker(path_q2, dir_path_q2, still_finding_paths_clone2, cloned_re));
 
         handles.push(handle_search);
