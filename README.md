@@ -17,9 +17,20 @@ Running unit tests:
 cargo test
 ```
 
-### Viewing the documentation
+### Viewing documentation
 ```bash
 cargo doc --open
+```
+
+### Benchmarking
+Benchmark of the whole program
+```bash
+cargo bench --bench bad_ripgrep
+```
+
+To see a detailed report open:
+```bash
+target/criterion/report/index.html
 ```
 
 ### Strategy:
