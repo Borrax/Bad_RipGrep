@@ -30,5 +30,5 @@ fn main() {
         Err(_) => panic!("Word expression can't be matched!")
     };
 
-    run_application(&re);
+    run_application(&re, std::io::stdout());
 }
