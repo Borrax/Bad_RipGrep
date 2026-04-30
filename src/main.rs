@@ -12,6 +12,7 @@
 //!  <built_target> <word/regex>
 //!  ```
 use regex::Regex;
+use std::sync::{Arc, Mutex};
 
 use bad_ripgrep::run_application;
 
@@ -30,5 +31,5 @@ fn main() {
         Err(_) => panic!("Word expression can't be matched!")
     };
 
-    run_application(&re, std::io::stdout());
+    run_application(&re, Arc::new(Mutex::new(std::io::stdout())));
 }
