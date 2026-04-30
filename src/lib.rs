@@ -187,9 +187,11 @@ mod test_look_for_match_in_file {
     const MAX_WORDS_AROUND_MATCH: usize = 5;
 
     fn run_target(re: &Regex) -> String {
-        let mut out = Vec::new();
-        look_for_match_in_file(&PATH, re, &mut out);
-        String::from_utf8(out).unwrap()
+        let out = Arc::new(Mutex::new(Vec::new()));
+        let out_clone = out.clone();
+        look_for_match_in_file(&PATH, re, out_clone);
+        let result = out.lock().unwrap().clone();
+        String::from_utf8(result).unwrap()
     }
 
     fn assert_surrounding_words_count(text: &str, search_word: &str) {
