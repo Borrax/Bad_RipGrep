@@ -4,14 +4,17 @@ use std::io::{BufReader, BufRead, Write};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::thread;
-use std::marker;
+use std::marker::Send;
 use regex::Regex;
 
 /// Alias for a mutex file/dir path containing Queue type
 /// See also [`search_worker`] and [`paths_worker`]
 type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 
-type WriteBuf = dyn Write + marker::Send + 'static;
+pub trait OutBufTrait: Write + Send {}
+impl<T: Write + Send> OutBufTrait for T {}
+
+type MutexOutBuf = Arc<Mutex<dyn OutBufTrait>>;
 
 /// Matches a regex expression through a file
 ///
@@ -22,7 +25,7 @@ type WriteBuf = dyn Write + marker::Send + 'static;
 ///
 /// See also [`search_worker`] and [`paths_worker`]
 fn look_for_match_in_file(path: &Path, re: &Regex,
-    write_buf: Arc<Mutex<WriteBuf>>) {
+    write_buf: MutexOutBuf) {
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
@@ -59,7 +62,8 @@ fn look_for_match_in_file(path: &Path, re: &Regex,
 ///
 /// See also [`look_for_match_in_file`]
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
-    still_finding_paths: Arc<Vec<AtomicBool>>, re: Regex, write_buf: Arc<Mutex<WriteBuf>>) {
+    still_finding_paths: Arc<Vec<AtomicBool>>, re: Regex,
+    write_buf: MutexOutBuf) {
     loop {
         let no_new_paths_coming = still_finding_paths.iter().all(|b| !b.load(Ordering::Relaxed));
 
@@ -136,7 +140,7 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 ///
 /// # Arguments
 /// * `search_re` - The regex/word that needs to be found
-pub fn run_application(search_re: &Regex, write_buf: Arc<Mutex<WriteBuf>> ) {
+pub fn run_application(search_re: &Regex, write_buf: MutexOutBuf ) {
     let num_threads = 6;
     let starting_path = PathBuf::from("./");
     let mutex_queue_paths: GlobalPathQueue = Arc::new(Mutex::new(VecDeque::new()));
