@@ -14,6 +14,7 @@ type GlobalPathQueue = Arc<Mutex<VecDeque<PathBuf>>>;
 /// Supertrait for the required output writable buffer for the app
 /// See also [`MutexOutBuf`]
 pub trait OutBufTrait: Write + Send {}
+// Assigning every type that has those traits automatically
 impl<T: Write + Send> OutBufTrait for T {}
 
 /// Alias for the mutex writable buffer type
@@ -309,9 +310,10 @@ mod test_look_for_match_in_file {
         let search_re = Regex::new(&search_word).unwrap();
         let path: &Path = Path::new("./test/path");
 
-        let mut out = Vec::new();
+        let out = Arc::new(Mutex::new(Vec::new()));
+        let out_clone = out.clone();
         let result = std::panic::catch_unwind(move || {
-            look_for_match_in_file(path, &search_re, &mut out)
+            look_for_match_in_file(path, &search_re, out_clone)
         });
 
         assert!(result.is_err());
