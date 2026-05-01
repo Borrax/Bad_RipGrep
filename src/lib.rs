@@ -34,6 +34,7 @@ fn look_for_match_in_file(path: &Path, re: &Regex,
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
+    let mut is_file_name_printed = false;
 
     for (index, line) in reader.lines().enumerate() {
         let line = match line {
@@ -51,6 +52,10 @@ fn look_for_match_in_file(path: &Path, re: &Regex,
                 .collect::<Vec<&str>>().join(" ");
 
             let mut out = write_buf.lock().unwrap();
+            if !is_file_name_printed {
+                let _ = writeln!(out, "\n{}", path.to_str().unwrap());
+                is_file_name_printed = true;
+            }
             let _ = writeln!(out, "{}: {} {} {}", index + 1, words_before, m.as_str(), words_after);
         }
     }
