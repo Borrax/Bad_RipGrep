@@ -30,7 +30,7 @@ type MutexOutBuf = Arc<Mutex<dyn OutBufTrait>>;
 ///
 /// See also [`search_worker`] and [`paths_worker`]
 fn look_for_match_in_file(path: &Path, re: &Regex,
-    write_buf: MutexOutBuf) {
+    write_buf: &MutexOutBuf) {
     let file = fs::File::open(path).expect("Could not open the file");
     let reader = BufReader::new(file);
     let max_words_around_match = 5;
@@ -92,7 +92,7 @@ fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPath
         };
 
         
-        look_for_match_in_file(&path, &re, write_buf.clone());
+        look_for_match_in_file(&path, &re, &write_buf);
     }
 
 }
@@ -202,10 +202,13 @@ mod test_look_for_match_in_file {
 
     fn run_target(re: &Regex) -> String {
         let out = Arc::new(Mutex::new(Vec::new()));
-        let out_clone = out.clone();
-        look_for_match_in_file(&PATH, re, out_clone);
-        let result = out.lock().unwrap().clone();
-        String::from_utf8(result).unwrap()
+        let out_clone = Arc::clone(&out) as MutexOutBuf;
+
+        look_for_match_in_file(&PATH, re, &out_clone);
+
+        let result = out.lock().unwrap();
+        std::str::from_utf8(&result).unwrap().to_string()
+        // String::from_utf8(&out).unwrap()
     }
 
     fn assert_surrounding_words_count(text: &str, search_word: &str) {
@@ -315,10 +318,9 @@ mod test_look_for_match_in_file {
         let search_re = Regex::new(&search_word).unwrap();
         let path: &Path = Path::new("./test/path");
 
-        let out = Arc::new(Mutex::new(Vec::new()));
-        let out_clone = out.clone();
+        let out = Arc::new(Mutex::new(Vec::new())) as MutexOutBuf;
         let result = std::panic::catch_unwind(move || {
-            look_for_match_in_file(path, &search_re, out_clone)
+            look_for_match_in_file(path, &search_re, &out)
         });
 
         assert!(result.is_err());
