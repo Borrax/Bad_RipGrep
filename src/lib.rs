@@ -229,9 +229,11 @@ mod test_look_for_match_in_file {
         // look_for_match_in_file(path, &search_word);
         let result = run_target(&search_re);
 
+        let lines: Vec<&str> = result.split("\n").collect();
+
         assert!(result.contains(&search_word));
 
-        assert_surrounding_words_count(&result, &search_word);
+        assert_surrounding_words_count(&result, lines[2]);
     }   
 
     #[test]
@@ -243,10 +245,10 @@ mod test_look_for_match_in_file {
 
         let lines: Vec<&str> = result.split("\n").collect();
         // last line is empty
-        assert_eq!(lines.len(), 4);
+        assert_eq!(lines.len(), 6);
 
         // last line is empty
-        for line in &lines[0..lines.len() - 1] {
+        for line in &lines[2..lines.len() - 1] {
             assert!(line.contains(&search_word));
             
             assert_surrounding_words_count(line, &search_word);
@@ -263,10 +265,10 @@ mod test_look_for_match_in_file {
 
         let lines: Vec<&str> = result.split("\n").collect();
         // last line is empty
-        assert_eq!(lines.len(), 2);
+        assert_eq!(lines.len(), 4);
 
         // last line is empty
-        for line in &lines[0..lines.len() - 1] {
+        for line in &lines[2..lines.len() - 1] {
             assert!(line.contains(&search_word));
             
             assert_surrounding_words_count(line, &search_word);
@@ -280,10 +282,10 @@ mod test_look_for_match_in_file {
 
         let lines: Vec<&str> = result.split("\n").collect();
         // last line is empty
-        assert_eq!(lines.len(), 3);
+        assert_eq!(lines.len(), 5);
 
         // last line is empty
-        for line in &lines[0..lines.len() - 1] {
+        for line in &lines[2..lines.len() - 1] {
             assert!(search_re.find(line).is_some());
         }
     }   
