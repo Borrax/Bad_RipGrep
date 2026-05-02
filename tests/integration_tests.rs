@@ -29,12 +29,11 @@ fn test_more_matches() {
     // last line is empty
     assert_eq!(lines.len(), 9); // including the generated from the benchmarks
 
-    // last line is empty
-    for line in &lines[1..lines.len() - 1] {
-        // assert!(line.contains(&search_word));
-        println!("{}", line);
+    // last line is empty and for now the first lines are from benchmark file
+    for line in &lines[5..lines.len() - 1] {
+        assert!(line.contains(&search_word));
         
-        // assert_surrounding_words_count(line, &search_word);
+        assert_surrounding_words_count(line, &search_word);
 
     }
 }   
