@@ -26,7 +26,7 @@ pub type MutexOutBuf = Arc<Mutex<dyn OutBufTrait>>;
 /// # Arguments
 /// * `path` - The path to the file relative to where the command was ran from
 /// * `re` - The regex expression taht needs to be matched
-/// * `out` - Output buffer the results are written to
+/// * `write_buf` - Output buffer the results are written to, See [MutexOutBuf]
 ///
 /// See also [`search_worker`] and [`paths_worker`]
 fn look_for_match_in_file(path: &Path, re: &Regex,
@@ -69,6 +69,7 @@ fn look_for_match_in_file(path: &Path, re: &Regex,
 /// * `dir_paths_queue` - A queue containing all the untraversed directories
 /// * `still_finding_paths` - Bool vector for every file path finding thread if they are still active
 /// * `re` - The target regex expression that needs to be matched
+/// * `write_buf` - Output buffer the results are written to, See [MutexOutBuf]
 ///
 /// See also [`look_for_match_in_file`]
 fn search_worker(paths_mutex_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
@@ -150,6 +151,7 @@ fn paths_worker(paths_queue: GlobalPathQueue, dir_paths_queue: GlobalPathQueue,
 ///
 /// # Arguments
 /// * `search_re` - The regex/word that needs to be found
+/// * `write_buf` - A buffer to write the results in. See [MutexOutBuf]
 pub fn run_application(search_re: &Regex, write_buf: MutexOutBuf ) {
     let num_threads = 6;
     let starting_path = PathBuf::from("./");
