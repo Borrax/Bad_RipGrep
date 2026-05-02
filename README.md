@@ -14,7 +14,11 @@ cargo run -- <search_word>
 ### Testing
 Running unit tests:
 ```bash
-cargo test
+cargo test --lib
+```
+Running integration tests:
+```bash
+cargo test --test integration_tests
 ```
 
 ### Viewing documentation
