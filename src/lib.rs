@@ -19,7 +19,7 @@ impl<T: Write + Send> OutBufTrait for T {}
 
 /// Alias for the mutex writable buffer type
 /// See also [`search_worker`] and [`look_for_match_in_file`]
-type MutexOutBuf = Arc<Mutex<dyn OutBufTrait>>;
+pub type MutexOutBuf = Arc<Mutex<dyn OutBufTrait>>;
 
 /// Matches a regex expression through a file
 ///
