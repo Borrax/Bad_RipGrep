@@ -29,11 +29,25 @@ fn test_more_matches() {
     // last line is empty
     assert_eq!(lines.len(), 9); // including the generated from the benchmarks
 
-    // last line is empty and for now the first lines are from benchmark file
+    // last line is empty
     for line in &lines[5..lines.len() - 1] {
+        println!("{}", line);
         assert!(line.contains(&search_word));
         
         assert_surrounding_words_count(line, &search_word);
 
     }
 }   
+
+#[test]
+fn test_non_existent_word() {
+    let chars = ['b', 'u', 'l', 'b', 'a', 's', 'a', 'u', 'r'];
+    let search_word = String::from_iter(chars);
+    let search_re = Regex::new(&search_word).unwrap();
+
+    let out = Arc::new(Mutex::new(Vec::new()));
+    run_application(&search_re, out.clone());
+    let result = String::from_utf8(out.lock().unwrap().to_vec()).unwrap();
+
+    assert_eq!("", result);
+}
